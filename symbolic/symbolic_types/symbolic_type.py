@@ -4,6 +4,8 @@ import utils
 import inspect
 import functools
 
+import builtins
+
 # the ABSTRACT base class for representing any expression that depends on a symbolic input
 # it also tracks the corresponding concrete value for the expression (aka concolic execution)
 
@@ -49,8 +51,27 @@ class SymbolicType(object):
 
 	# creating the expression tree
 	def _do_sexpr(self,args,fun,op,wrap):
+		eval_with_symbolic_inputs = False
+		try:
+			if (builtins._eval_within_file):
+				for a in args:
+					if isinstance(a,SymbolicType):
+						eval_with_symbolic_inputs = True
+
+						print("Eval with symbolic inputs: " +
+							str(
+								[(args[i].toString() if isinstance(args[i],SymbolicType) else args[i])
+								for i in range(0, len(args))]
+							)
+						)
+						print("with operation: " + op)
+
+						break
+		except:
+			pass
+		
 		unwrapped = [ (a.unwrap() if isinstance(a,SymbolicType) else (a,a)) for a in args ]
-		args = zip(inspect.getargspec(fun).args, [ c for (c,s) in unwrapped ])
+		args = zip(inspect.getfullargspec(fun).args, [ c for (c,s) in unwrapped ])
 		concrete = fun(**dict([a for a in args]))
 		symbolic = [ op ] + [ s for c,s in unwrapped ]
 		return wrap(concrete,symbolic)

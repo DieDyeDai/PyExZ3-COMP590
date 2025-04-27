@@ -45,6 +45,7 @@ class ExplorationEngine:
 		constraint.inputs = self._getInputs()
 
 	def explore(self, max_iterations=0):
+		log.info("Starting exploration")
 		self._oneExecution()
 		
 		iterations = 1
@@ -56,7 +57,7 @@ class ExplorationEngine:
 			selected = self.constraints_to_solve.popleft()
 			if selected.processed:
 				continue
-			self._setInputs(selected.inputs)			
+			self._setInputs(selected.inputs)
 
 			log.info("Selected constraint %s" % selected)
 			asserts, query = selected.getAssertsAndQuery()

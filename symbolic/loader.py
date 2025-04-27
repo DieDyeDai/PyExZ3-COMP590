@@ -31,7 +31,7 @@ class Loader:
 	def createInvocation(self):
 		inv = FunctionInvocation(self._execute,self._resetCallback)
 		func = self.app.__dict__[self._entryPoint]
-		argspec = inspect.getargspec(func)
+		argspec = inspect.getfullargspec(func)
 		# check to see if user specified initial values of arguments
 		if "concrete_args" in func.__dict__:
 			for (f,v) in func.concrete_args.items():
@@ -95,7 +95,24 @@ class Loader:
 			raise ImportError()
 
 	def _execute(self, **args):
-		return self.app.__dict__[self._entryPoint](**args)
+		# import builtins
+		# _builtin_eval = builtins.eval
+		# def symbolic_eval(arg, *args, **kwargs):
+		# 	print("eval with args")
+		# 	print("-----------------------------------------\n-----------------------------------------")
+		# 	print(arg)
+		# 	print("-----------------------------------------")
+		# 	# print(args)
+		# 	# print("-----------------------------------------")
+		# 	# print(**kwargs)
+		# 	return _builtin_eval(arg, *args, **kwargs)
+		# builtins.eval = symbolic_eval
+		
+		res = self.app.__dict__[self._entryPoint](**args)
+		
+		# builtins.eval = _builtin_eval
+
+		return res
 
 	def _toBag(self,l):
 		bag = {}

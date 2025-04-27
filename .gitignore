@@ -15,6 +15,13 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.vscode/
+.conda/
+.spyproject/
+__pycache__/
+z.py
+z.dot
+z.log
 
 # External tool builders
 .externalToolBuilders/
