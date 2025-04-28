@@ -95,24 +95,7 @@ class Loader:
 			raise ImportError()
 
 	def _execute(self, **args):
-		# import builtins
-		# _builtin_eval = builtins.eval
-		# def symbolic_eval(arg, *args, **kwargs):
-		# 	print("eval with args")
-		# 	print("-----------------------------------------\n-----------------------------------------")
-		# 	print(arg)
-		# 	print("-----------------------------------------")
-		# 	# print(args)
-		# 	# print("-----------------------------------------")
-		# 	# print(**kwargs)
-		# 	return _builtin_eval(arg, *args, **kwargs)
-		# builtins.eval = symbolic_eval
-		
-		res = self.app.__dict__[self._entryPoint](**args)
-		
-		# builtins.eval = _builtin_eval
-
-		return res
+		return self.app.__dict__[self._entryPoint](**args)
 
 	def _toBag(self,l):
 		bag = {}

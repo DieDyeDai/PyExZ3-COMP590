@@ -13,11 +13,9 @@ import builtins
 log = logging.getLogger("se.z3")
 
 class SymbolicType(object):
-	def __init__(self, name, expr=None, tainted=False):
+	def __init__(self, name, expr=None):
 		self.name = name
 		self.expr = expr
-
-		self.tainted = tainted
 
 	# to be provided by subclass
 
@@ -58,8 +56,8 @@ class SymbolicType(object):
 	def _do_sexpr(self,args,fun,op,wrap):
 		tainted = False
 		try:
+			# If operations on symbolic types are being run within an eval/exec call, set the tainted flag on the current path constraint.
 			if (builtins._eval_within_file):
-				tainted = True
 				SymbolicObject.SI.current_constraint.tainted = True
 				for a in args:
 					if isinstance(a,SymbolicType):
@@ -74,7 +72,6 @@ class SymbolicType(object):
 						print(eval_warn_str)
 						break
 			if (builtins._exec_within_file):
-				tainted = True
 				SymbolicObject.SI.current_constraint.tainted = True
 				for a in args:
 					if isinstance(a,SymbolicType):
@@ -95,9 +92,7 @@ class SymbolicType(object):
 			args = zip(inspect.getfullargspec(fun).args, [ c for (c,s) in unwrapped ])
 			concrete = fun(**dict([a for a in args]))
 			symbolic = [ op ] + [ s for c,s in unwrapped ]
-			result = wrap(concrete, symbolic)
-			result.tainted = tainted
-			return result
+			return wrap(concrete, symbolic)
 
 	def symbolicEq(self, other):
 		if not isinstance(other,SymbolicType):

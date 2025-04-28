@@ -17,6 +17,7 @@ class Constraint:
 		self.id = self.__class__.cnt
 		self.__class__.cnt += 1
 
+		# Flag to be set during symbolic execution, if a symbolic `eval`/`exec` is executed on the node with this constraint.
 		self.tainted = False
 
 	def __eq__(self, other):

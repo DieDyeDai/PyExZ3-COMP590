@@ -26,7 +26,7 @@ class PathToConstraint:
 				self.expected_path.append(tmp.predicate)
 				tmp = tmp.parent
 
-	def whichBranch(self, branch, symbolic_type, from_eval=False):
+	def whichBranch(self, branch, symbolic_type):
 		""" This function acts as instrumentation.
 		Branch can be either True or False."""
 
@@ -36,12 +36,6 @@ class PathToConstraint:
 		cneg = self.current_constraint.findChild(p)
 		p.negate()
 		c = self.current_constraint.findChild(p)
-
-		try:
-			if symbolic_type.tainted:
-				c.tainted = True
-		except:
-			pass
 
 		if c is None:
 			c = self.current_constraint.addChild(p)

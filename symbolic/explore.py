@@ -12,7 +12,6 @@ from .symbolic_types import symbolic_type, SymbolicType
 log = logging.getLogger("se.conc")
 
 class ExplorationEngine:
-
 	def __init__(self, funcinv, solver="z3"):
 		self.invocation = funcinv
 		# the input to the function
@@ -46,7 +45,7 @@ class ExplorationEngine:
 		constraint.inputs = self._getInputs()
 
 	def explore(self, max_iterations=0):
-		log.info("Starting exploration")
+		log.info("Starting exploration\n  ----------------  ")
 		self._oneExecution()
 		
 		iterations = 1

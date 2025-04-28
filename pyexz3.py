@@ -38,6 +38,9 @@ solver = "cvc" if options.cvc else "z3"
 
 filename = os.path.abspath(args[0])
 
+# This code is prepended to the file being analyzed, in order to only hook into `exec` and `eval` calls within module scope. The result of the prepend is set to a new file that is then passed into the main symbolic execution engine.
+# It sets a global flag accessible to the entire call stack (the builtins module) and passes in whatever global and local scopes were originally passed into `eval`/`exec` (the scopes of the previous stack frame, or the provided scopes).
+# The global flag is read when operations on symbolic objects are executed in `symbolic_type.py` to check if the operation is being executed within an `eval`/`exec`.
 prepend_eval = """
 import builtins
 import inspect
@@ -67,11 +70,8 @@ def exec(arg, /, globals=0, locals=0, *, closure=None):
 
   builtins._exec_within_file = False
 
-
 """
-
 appended_filename = '_explore.py'
-
 with open(filename, 'r') as _f:
 	with open(appended_filename, 'w+') as f:
 		content = _f.read()
@@ -95,14 +95,19 @@ try:
 	result = app.executionComplete(returnVals)
 
 	# output DOT graph
+	# minor change: allow setting the name of the .dot file to output.
 	if not (options.dot_graph == ""):
 		file = open(options.dot_graph+".dot","w")
 		file.write(path.toDot())
 		file.close()
 
-		# run_dot_string = "dot -Tsvg " + options.dot_graph+".dot -o " + options.dot_graph + ".svg"
-		# print(run_dot_string)
-		# subprocess.run(run_dot_string)
+		# If GraphViz's `dot` program is installed, this may work.
+		try:
+			run_dot_string = "dot -Tsvg " + options.dot_graph+".dot -o " + options.dot_graph + ".svg"
+			print(run_dot_string)
+			subprocess.run(run_dot_string)
+		except Exception as e:
+			print(f"Error creating SVG from graph: {e}")
 
 except ImportError as e:
 	# createInvocation can raise this
