@@ -1,5 +1,6 @@
 # Copyright: see copyright.txt
 
+from symbolic.path_to_constraint import PathToConstraint
 import utils
 import inspect
 import functools
@@ -55,29 +56,37 @@ class SymbolicType(object):
 
 	# creating the expression tree
 	def _do_sexpr(self,args,fun,op,wrap):
-		eval_with_symbolic_inputs = False
+		tainted = False
 		try:
 			if (builtins._eval_within_file):
+				tainted = True
+				SymbolicObject.SI.current_constraint.tainted = True
 				for a in args:
 					if isinstance(a,SymbolicType):
-						log.warning("Eval with symbolic inputs: " +
+						eval_warn_str = ("Eval with symbolic inputs: " +
 							str(
 								[(args[i].toString() if isinstance(args[i],SymbolicType) else args[i])
 								for i in range(0, len(args))]
-							)
+							) +
+							"\nwith operation: " + op
 						)
-						log.warning("with operation: " + op)
+						log.warning(eval_warn_str)
+						print(eval_warn_str)
 						break
 			if (builtins._exec_within_file):
+				tainted = True
+				SymbolicObject.SI.current_constraint.tainted = True
 				for a in args:
 					if isinstance(a,SymbolicType):
-						log.warning("Exec with symbolic inputs: " +
+						exec_warn_str = ("Exec with symbolic inputs: " +
 							str(
 								[(args[i].toString() if isinstance(args[i],SymbolicType) else args[i])
 								for i in range(0, len(args))]
-							)
+							) +
+							"\nwith operation: " + op
 						)
-						log.warning("with operation: " + op)
+						log.warning(exec_warn_str)
+						print(exec_warn_str)
 						break
 		except:
 			pass
@@ -87,7 +96,7 @@ class SymbolicType(object):
 			concrete = fun(**dict([a for a in args]))
 			symbolic = [ op ] + [ s for c,s in unwrapped ]
 			result = wrap(concrete, symbolic)
-			result.tainted = True
+			result.tainted = tainted
 			return result
 
 	def symbolicEq(self, other):
@@ -131,7 +140,7 @@ class SymbolicObject(SymbolicType,object):
 	def __init__(self, name, expr=None):
 		SymbolicType.__init__(self,name,expr)
 
-	SI = None    # this is set up by ConcolicEngine to link __bool__ to PathConstraint
+	SI : PathToConstraint = None    # this is set up by ConcolicEngine to link __bool__ to PathConstraint
 
 	def wrap(conc,sym):
 		# see __init__.py

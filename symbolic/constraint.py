@@ -17,6 +17,8 @@ class Constraint:
 		self.id = self.__class__.cnt
 		self.__class__.cnt += 1
 
+		self.tainted = False
+
 	def __eq__(self, other):
 		"""Two Constraints are equal iff they have the same chain of predicates"""
 		if isinstance(other, Constraint):

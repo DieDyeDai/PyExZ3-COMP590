@@ -14,7 +14,6 @@ class PathToConstraint:
 		self.root_constraint = Constraint(None, None)
 		self.current_constraint = self.root_constraint
 		self.expected_path = None
-		self.tainted = False
 
 	def reset(self,expected):
 		self.current_constraint = self.root_constraint
@@ -31,18 +30,18 @@ class PathToConstraint:
 		""" This function acts as instrumentation.
 		Branch can be either True or False."""
 
-		try:
-			if symbolic_type.tainted:
-				self.tainted = True
-		except:
-			pass
-
 		# add both possible predicate outcomes to constraint (tree)
 		p = Predicate(symbolic_type, branch)
 		p.negate()
 		cneg = self.current_constraint.findChild(p)
 		p.negate()
 		c = self.current_constraint.findChild(p)
+
+		try:
+			if symbolic_type.tainted:
+				c.tainted = True
+		except:
+			pass
 
 		if c is None:
 			c = self.current_constraint.addChild(p)
@@ -70,6 +69,7 @@ class PathToConstraint:
 			cneg.processed = True
 			c.processed = True
 			log.debug("Processed constraint: %s" % c)
+			print("Processed constraint: %s" % c)
 
 		self.current_constraint = c
 
@@ -86,6 +86,8 @@ class PathToConstraint:
 			label = c.predicate.symtype.toString()
 			if not c.predicate.result:
 				label = "Not("+label+")"
+			if c.tainted:
+				label = label + "\n[has symbolic exec/eval]"
 		node = "C" + str(c.id) + " [ label=\"" + label + "\" ];\n"
 		edges = [ "C" + str(c.id) + " -> " + "C" + str(child.id) + ";\n" for child in c.children ]
 		return node + "".join(edges) + "".join([ self._toDot(child) for child in c.children ])

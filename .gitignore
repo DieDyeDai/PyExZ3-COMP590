@@ -23,6 +23,7 @@ z.py
 z.dot
 z.log
 z.svg
+_explore.py
 
 # External tool builders
 .externalToolBuilders/

@@ -7,6 +7,6 @@ def match_test(a,b):
     case 3:
       return 3
     case 99999:
-      return 99999
+      return eval('a-b')
     case _:
       return -1
