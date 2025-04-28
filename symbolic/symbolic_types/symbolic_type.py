@@ -3,16 +3,20 @@
 import utils
 import inspect
 import functools
-
+import logging
 import builtins
 
 # the ABSTRACT base class for representing any expression that depends on a symbolic input
 # it also tracks the corresponding concrete value for the expression (aka concolic execution)
 
+log = logging.getLogger("se.z3")
+
 class SymbolicType(object):
-	def __init__(self, name, expr=None):
+	def __init__(self, name, expr=None, tainted=False):
 		self.name = name
 		self.expr = expr
+
+		self.tainted = tainted
 
 	# to be provided by subclass
 
@@ -56,25 +60,35 @@ class SymbolicType(object):
 			if (builtins._eval_within_file):
 				for a in args:
 					if isinstance(a,SymbolicType):
-						eval_with_symbolic_inputs = True
-
-						print("Eval with symbolic inputs: " +
+						log.warning("Eval with symbolic inputs: " +
 							str(
 								[(args[i].toString() if isinstance(args[i],SymbolicType) else args[i])
 								for i in range(0, len(args))]
 							)
 						)
-						print("with operation: " + op)
-
+						log.warning("with operation: " + op)
+						break
+			if (builtins._exec_within_file):
+				for a in args:
+					if isinstance(a,SymbolicType):
+						log.warning("Exec with symbolic inputs: " +
+							str(
+								[(args[i].toString() if isinstance(args[i],SymbolicType) else args[i])
+								for i in range(0, len(args))]
+							)
+						)
+						log.warning("with operation: " + op)
 						break
 		except:
 			pass
-		
-		unwrapped = [ (a.unwrap() if isinstance(a,SymbolicType) else (a,a)) for a in args ]
-		args = zip(inspect.getfullargspec(fun).args, [ c for (c,s) in unwrapped ])
-		concrete = fun(**dict([a for a in args]))
-		symbolic = [ op ] + [ s for c,s in unwrapped ]
-		return wrap(concrete,symbolic)
+		finally:
+			unwrapped = [ (a.unwrap() if isinstance(a,SymbolicType) else (a,a)) for a in args ]
+			args = zip(inspect.getfullargspec(fun).args, [ c for (c,s) in unwrapped ])
+			concrete = fun(**dict([a for a in args]))
+			symbolic = [ op ] + [ s for c,s in unwrapped ]
+			result = wrap(concrete, symbolic)
+			result.tainted = True
+			return result
 
 	def symbolicEq(self, other):
 		if not isinstance(other,SymbolicType):

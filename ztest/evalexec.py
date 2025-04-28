@@ -1,10 +1,3 @@
-import builtins
-
-def eval(arg, globals, locals):
-  builtins._eval_within_file = True
-  builtins.eval(arg, globals, locals)
-  builtins._eval_within_file = False
-
 def nested_test(a,b,c):
   x = 1 + 2
   y = 1 + a
@@ -15,7 +8,8 @@ def nested_test(a,b,c):
 def f(a,b):
   c = 1 + a
   if (a + b < c * c):
-    d = eval('c+1', globals(), locals())
+    d = eval('c+1')
+    exec('print(a+b)')
     if (d > 0):
       return a+c
   c = eval('a-b')

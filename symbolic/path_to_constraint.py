@@ -14,6 +14,7 @@ class PathToConstraint:
 		self.root_constraint = Constraint(None, None)
 		self.current_constraint = self.root_constraint
 		self.expected_path = None
+		self.tainted = False
 
 	def reset(self,expected):
 		self.current_constraint = self.root_constraint
@@ -26,9 +27,15 @@ class PathToConstraint:
 				self.expected_path.append(tmp.predicate)
 				tmp = tmp.parent
 
-	def whichBranch(self, branch, symbolic_type):
+	def whichBranch(self, branch, symbolic_type, from_eval=False):
 		""" This function acts as instrumentation.
 		Branch can be either True or False."""
+
+		try:
+			if symbolic_type.tainted:
+				self.tainted = True
+		except:
+			pass
 
 		# add both possible predicate outcomes to constraint (tree)
 		p = Predicate(symbolic_type, branch)

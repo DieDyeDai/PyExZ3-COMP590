@@ -12,6 +12,9 @@ from .symbolic_types import symbolic_type, SymbolicType
 log = logging.getLogger("se.conc")
 
 class ExplorationEngine:
+
+	selected_pc : PathToConstraint | None = None
+
 	def __init__(self, funcinv, solver="z3"):
 		self.invocation = funcinv
 		# the input to the function
@@ -68,6 +71,8 @@ class ExplorationEngine:
 			else:
 				for name in model.keys():
 					self._updateSymbolicParameter(name,model[name])
+
+			ExplorationEngine.selected_pc = selected
 
 			self._oneExecution(selected)
 

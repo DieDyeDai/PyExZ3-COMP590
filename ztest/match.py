@@ -1,0 +1,12 @@
+def match_test(a,b):
+  match a+b:
+    case 1:
+      return 1
+    case 2:
+      return 2
+    case 3:
+      return 3
+    case 99999:
+      return 99999
+    case _:
+      return -1

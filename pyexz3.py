@@ -4,6 +4,7 @@ import os
 import sys
 import logging
 import traceback
+import subprocess
 from optparse import OptionParser
 
 from symbolic.loader import *
@@ -39,21 +40,47 @@ filename = os.path.abspath(args[0])
 
 prepend_eval = """
 import builtins
-
-def eval(arg, globals, locals):
+import inspect
+def eval(arg, globals=0, locals=0):
   builtins._eval_within_file = True
-  builtins.eval(arg, globals, locals)
+
+  previous_call_frame = inspect.stack()[1][0]
+  
+  _globals = previous_call_frame.f_globals if (globals == 0) else globals
+  _locals = previous_call_frame.f_locals if (locals == 0) else locals
+  
+  res = builtins.eval(arg, _globals, _locals)
+
   builtins._eval_within_file = False
+
+  return res
+
+def exec(arg, /, globals=0, locals=0, *, closure=None):
+  builtins._exec_within_file = True
+
+  previous_call_frame = inspect.stack()[1][0]
+  
+  _globals = previous_call_frame.f_globals if (globals == 0) else globals
+  _locals = previous_call_frame.f_locals if (locals == 0) else locals
+  
+  builtins.exec(arg, _globals, _locals, closure=closure)
+
+  builtins._exec_within_file = False
+
+
 """
+
+appended_filename = '_explore.py'
+
 with open(filename, 'r') as _f:
-	with open('z.py', 'w+') as f:
+	with open(appended_filename, 'w+') as f:
 		content = _f.read()
 		f.seek(0,0)
 		f.write(prepend_eval)
 		f.write(content)
 
 # Get the object describing the application
-app = loaderFactory(filename,options.entry)
+app = loaderFactory(appended_filename,options.entry)
 if app == None:
 	sys.exit(1)
 
@@ -70,8 +97,12 @@ try:
 	# output DOT graph
 	if not (options.dot_graph == ""):
 		file = open(options.dot_graph+".dot","w")
-		file.write(path.toDot())	
+		file.write(path.toDot())
 		file.close()
+
+		# run_dot_string = "dot -Tsvg " + options.dot_graph+".dot -o " + options.dot_graph + ".svg"
+		# print(run_dot_string)
+		# subprocess.run(run_dot_string)
 
 except ImportError as e:
 	# createInvocation can raise this
@@ -79,6 +110,6 @@ except ImportError as e:
 	sys.exit(1)
 
 if result == None or result == True:
-	sys.exit(0);
+	sys.exit(0)
 else:
-	sys.exit(1);	
+	sys.exit(1)
