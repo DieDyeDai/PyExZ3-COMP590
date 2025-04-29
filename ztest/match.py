@@ -1,16 +1,8 @@
-import builtins
-eval = builtins.eval
-exec = builtins.exec
-
 def match_test(a,b):
   match a+b:
     case 1:
       exec('print(f"Uncaught exec! {a},{b}")')
       return 1
-    case 2:
-      return 2
-    case 3:
-      return 3
     case 99999:
       if eval('a-b') < 0:
         if (b < 0):
