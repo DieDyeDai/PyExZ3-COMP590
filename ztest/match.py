@@ -1,3 +1,7 @@
+import builtins
+eval = builtins.eval
+exec = builtins.exec
+
 def match_test(a,b):
   match a+b:
     case 1:
@@ -18,7 +22,5 @@ def match_test(a,b):
       if eval('a' + '+b') == 0:
         return 100000
       return 101
-    case 0.5:
-      return 0.5
     case _:
       return -1
