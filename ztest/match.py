@@ -1,6 +1,7 @@
 def match_test(a,b):
   match a+b:
     case 1:
+      exec('print(f"Uncaught exec! {a},{b}")')
       return 1
     case 2:
       return 2
