@@ -8,7 +8,16 @@ def match_test(a,b):
       return 3
     case 99999:
       if eval('a-b') < 0:
-        return 100
+        if (b < 0):
+          return 9
+        else:
+          return 10
       return 99
+    case 100000:
+      if eval('a' + '+b') == 0:
+        return 100000
+      return 101
+    case 0.5:
+      return 0.5
     case _:
       return -1
